@@ -1,64 +1,29 @@
-# Food-Demand-Forecasting
-Problem Statement
-The data set is related to a meal delivery company which operates in multiple cities. They have various fulfilment centers in these cities for dispatching meal orders to their customers.
-The dataset consists of historical data of demand for a product-center combination for weeks 1 to 145.
-With the given data and information, the task is to predict the demand for the next 10 weeks (Weeks: 146-155) for the center-meal combinations, so that these fulfilment centers stock the necessary raw materials accordingly.
+**Problem Definition**
 
-Business Benefits
-The replenishment of raw materials is done only on weekly basis and since the raw material is perishable, the procurement planning is of utmost importance.
-Therefore predicting the Demand helps in reducing the wastage of raw materials which would result in the reduced cost of operation. Increased customer satisfaction by timely fulfilling their expectations and requirements.
+Your client is a meal delivery company which operates in multiple cities. They have various fulfillment centers in these cities for dispatching meal orders to their customers. The client wants you to help these centers with demand forecasting for upcoming weeks so that these centers will plan the stock of raw materials accordingly.
 
-Data Dictionary
-The dataset consists of three individual datasheets, the first dataset contains the historical demand data for all centers, the second dataset contains the information of each fulfillment center and the third dataset contains the meal information.
+The replenishment of majority of raw materials is done on weekly basis and since the raw material is perishable, the procurement planning is of utmost importance. Secondly, staffing of the centers is also one area wherein accurate demand forecasts are really helpful. Given the following information, the task is to predict the demand for the next 10 weeks (Weeks: 146-155) for the center-meal combinations in the test set:  
 
-Weekly Demand data (train.csv):
-Contains the historical demand data for all centers. The Train dataset consists of 9 variables and records of 423727 unique orders. test.csv contains all the following features except the target variable. The Test dataset consists of 8 variables and records of 32573 unique orders.
+Historical data of demand for a product-center combination (Weeks: 1 to 145)
+Product(Meal) features such as category, sub-category, current price and discount
+Information for fulfillment center like center area, city information etc.
+ 
+** Data Dictionary**
+ 
+1. Weekly Demand data (train.csv): Contains the historical demand data for all centers, test.csv contains all the following features except the target variable
 
-Variable	Definition
-id	Unique ID
-week	Week No
-center_id	Unique ID for fulfillment center
-meal_id	Unique ID for Meal
-checkout_price	Final price including discount, taxes & delivery charges
-base_price	Base price of the meal
-emailer_for_promotion	Emailer sent for promotion of meal
-homepage_featured	Meal featured at homepage
-num_orders	(Target) Orders CountThe data set is related to a meal delivery company which operates in multiple cities. They have various fulfilment centers in these cities for dispatching meal orders to their customers. The dataset consists of historical data of demand for a product-center combination for weeks 1 to 145. With the given data and information, the task is to predict the demand for the next 10 weeks (Weeks: 146-155) for the center-meal combinations, so that these fulfilment centers stock the necessary raw materials accordingly.
-Business Benefits
-The replenishment of raw materials is done only on weekly basis and since the raw material is perishable, the procurement planning is of utmost importance.
-Therefore predicting the Demand helps in reducing the wastage of raw materials which would result in the reduced cost of operation. Increased customer satisfaction by timely fulfilling their expectations and requirements.
 
-Data Dictionary
-The dataset consists of three individual datasheets, the first dataset contains the historical demand data for all centers, the second dataset contains the information of each fulfillment center and the third dataset contains the meal information.
+ ![image](https://user-images.githubusercontent.com/96159329/160981050-9db009a1-da52-4cc0-8639-f347d290b7a3.png)
 
-Weekly Demand data (train.csv):
-Contains the historical demand data for all centers. The Train dataset consists of 9 variables and records of 423727 unique orders. test.csv contains all the following features except the target variable. The Test dataset consists of 8 variables and records of 32573 unique orders.
+![image](https://user-images.githubusercontent.com/96159329/160981097-adb87718-481e-4397-a0e5-ef5d95d7defa.png)
 
-Variable Definition
-id Unique ID
-week Week No
-center_id Unique ID for fulfillment center
-meal_id Unique ID for Meal
-checkout_price Final price including discount, taxes & delivery charges
-base_price Base price of the meal
-emailer_for_promotion Emailer sent for promotion of meal
-homepage_featured Meal featured at homepage
-num_orders (Target) Orders Count
+![image](https://user-images.githubusercontent.com/96159329/160981148-0ef4ab45-fe8d-49f5-9061-717c43193873.png)
 
-fulfilment_center_info.csv:
-Contains information for each fulfilment center. The dataset consists of 5 variables and records of 77 unique fulfillment centers.
+**Evaluation Metric**
+The evaluation metric for this competition is 100*RMSLE where RMSLE is Root of Mean Squared Logarithmic Error across all entries in the test set.
 
-Variable Definition
-center_id Unique ID for fulfillment center
-city_code Unique code for city
-region_code Unique code for region
-center_type Anonymized center type
-op_area Area of operation (in km^2)
+Public and Private Split
+Test data is further randomly divided into Public (30%) and Private (70%) data.
 
-meal_info.csv:
-Contains information for each meal being served
-
-Variable Definition
-meal_id Unique ID for the meal
-category Type of meal (beverages/snacks/soups….)
-cuisine Meal cuisine (Indian/Italian/…)
+Your initial responses will be checked and scored on the Public data.
+The final rankings would be based on your private score which will be published once the competition is over.
