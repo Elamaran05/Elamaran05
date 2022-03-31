@@ -1,0 +1,222 @@
+---
+title: "FoodDemand_forecasting"
+author: "Elamaran Jayabarathy"
+date: "3/27/2022"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#install.packages("wesanderson")
+# Load
+library(wesanderson)
+library(lubridate)
+library(dplyr)
+library(forecast)
+library(caret)
+library(rpart)
+library(rpart.plot)
+```
+## R Markdown
+##loading csv files
+
+```{r cars}
+
+train <-read.csv("D:/Projects/DemandForecasting/train_GzS76OK/train.csv")
+fulfilment <-read.csv("D:/Projects/DemandForecasting/train_GzS76OK/fulfilment_center_info.csv")
+meal <-read.csv("D:/Projects/DemandForecasting/train_GzS76OK/meal_info.csv")
+test <-read.csv("D:/Projects/DemandForecasting/test_QoiMO9B.csv")
+```
+
+
+###Merging the files
+
+```{r}
+Train1<-merge(train,fulfilment,by='center_id')
+trainfull <- merge(Train1,meal, by='meal_id')
+trainfull
+
+Test1<-merge(test,fulfilment,by='center_id')
+testfull <- merge(Test1,meal, by='meal_id')
+testfull
+
+```
+
+
+###Exploratory Data Analysis
+##Summary Statistics
+
+```{r}
+summary(trainfull)
+summary(testfull)
+
+```
+
+
+## Removing Outlier
+```{r}
+
+max(trainfull$num_orders)
+trainf<-subset(trainfull, num_orders!=24299)
+
+```
+
+###Checking for Null values
+
+```{r}
+missing_values<-summarise_all(trainf,funs(sum(is.na(.))/n()))
+missing_values<-list(missing_values,key="feature",value="MissingPoints")
+
+
+```
+###Visualizing Number of Orders 
+
+```{r}
+plot(trainf$checkout_price,trainf$num_orders, col= "blue", main="Number of Orders Processed Vs CheckoutPrice")
+
+```
+
+###Visualizing Number of Orders vsWeek numbers
+
+```{r}
+plot(trainf$week,trainf$num_orders, col="red",main="No of Orders processed vs Week numbers")
+
+```
+
+###Visualizing Number of Orders vs Meal id
+```{r}
+plot(trainf$meal_id,trainf$num_orders,col='dark Green', main="No of Orders procesed vs Meal id")
+
+
+```
+
+###Visualizing Number of Orders vs Center id
+
+```{r}
+
+plot(trainf$center_id,trainf$num_orders,col='blue', main="No of Orders processed vs Center id")
+
+```
+
+###Visualizing Number of Orders vs emailer for promotion
+
+```{r}
+
+g<-ggplot(data=trainf)
+g<-g+geom_bar(stat="identity",aes(x=emailer_for_promotion,y=num_orders,fill=emailer_for_promotion))
+g<-g+xlab("Emailer For promotion")+ylab("Number of orders")+theme(legend.position = "none")+scale_y_continuous(name="Number of orders", labels = scales::comma)
+g 
+
+
+```
+
+###Visualizing Number of Orders vs Homepage featured
+
+```{r}
+
+g<-ggplot(data=trainf)
+g<-g+geom_bar(stat="identity",aes(x=homepage_featured, y= num_orders,fill=homepage_featured))
+g<-g+xlab("Home Page featured")+ylab("Number of orders")+theme(legend.position = "none")
+g+scale_y_continuous(name="Number of orders", labels = scales::comma)
+
+
+
+
+```
+
+
+###Visualizing Number of Orders vs Category
+
+```{r}
+
+
+g<-ggplot(data=trainf)
+g<-g+geom_bar(stat="identity",aes(x=category, y= num_orders,fill=category))
+g<-g+xlab("Category")+ylab("Number of orders")+theme(legend.position = "none")
+g+scale_y_continuous(name="Number of orders", labels = scales::comma)
+
+
+
+```
+
+
+
+###Visualizing Number of Orders vs Cuisine
+
+```{r}
+
+g<-ggplot(data=trainf)
+g<-g+geom_bar(stat="identity",aes(x=cuisine, y= num_orders,fill=cuisine))
+g<-g+xlab("Cuisine")+ylab("Number of orders")+theme(legend.position = "none")
+g+scale_y_continuous(name="Number of orders", labels = scales::comma)
+
+
+
+```
+
+###Visualizing Number of Orders vs Center_type
+```{r}
+g<-ggplot(data=trainf)
+g<-g+geom_bar(stat="identity",aes(x=center_type, y= num_orders,fill=center_type))
+g<-g+xlab("Center_type")+ylab("Number of orders")+theme(legend.position = "none")
+g+scale_y_continuous(name="Number of units", labels = scales::comma)
+
+
+```
+###Correlation matrix
+
+```{r}
+library(corrplot)
+
+M<-cor(trainf[, unlist(lapply(trainf, is.numeric))],method="pearson")
+M
+corrplot(M,method="circle")
+
+```
+
+
+##Building Random Forest ML Model
+
+```{r}
+library(randomForest)
+rf<-randomForest(num_orders~meal_id+checkout_price+base_price+emailer_for_promotion+homepage_featured+center_type+cuisine,data=trainf,ntree=50)
+rf
+summary(rf)
+
+
+
+```
+###Splitting the test data into Public and Private 
+
+```{r}
+Private.index <- sample(c(1:dim(testfull)[1]), dim(testfull)[1]*0.7)
+Public.index <- setdiff(c(1:dim(testfull)[1]), Private.index)
+Privatet.df <- testfull[Private.index, ]
+Public.df <- testfull[Public.index, ]
+```
+
+##Predicting on Train Data
+```{r}
+library(dplyr)
+
+trainf$predRF<-predict(rf,data=trainf)
+head(select(trainf,c(predRF,num_orders)))
+rmsle<- sqrt(1/length(trainf$num_orders)*sum((log(trainf$predRF +1)-log(trainf$num_orders +1))^2))
+
+```
+
+##Copying the Predicted values of test data to csv
+```{r}
+predict_test <-predict(rf,newda=testfull)
+Public_predict<-data.frame(testfull$id,num_orders=predict_test)
+write.csv(Public_predict,"Public_predict_1.csv",row.names = F)
+```
+
+
+
+
